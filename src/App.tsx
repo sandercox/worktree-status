@@ -3,7 +3,7 @@ import { Header } from "./components/Header";
 
 // Tauri imports
 import { open } from "@tauri-apps/plugin-dialog";
-import { Store, createStore } from "@tauri-apps/plugin-store";
+import { Store, load } from "@tauri-apps/plugin-store";
 
 // Components
 import { Gear } from "react-bootstrap-icons";
@@ -39,7 +39,7 @@ function App() {
 
   React.useEffect(() => {
     async function initStore() {
-      const newStore = await createStore("worktree-status", undefined);
+      const newStore = await load("worktree-status", undefined);
       newStore.get<Config>("config").then((c) => {
         if (
           c === null ||
