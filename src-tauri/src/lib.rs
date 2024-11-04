@@ -188,6 +188,23 @@ struct Payload {
     cwd: String,
 }
 
+fn setup_menu(app: &tauri::App, tray: &tauri::tray::TrayIcon) -> tauri::Result<()> {
+    let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
+    let menu = Menu::with_items(app, &[&quit_i])?;
+
+    tray.set_menu(Some(menu))?;
+    tray.set_show_menu_on_left_click(false)?;
+    tray.on_menu_event(|app, event| match event.id.as_ref() {
+        "quit" => {
+            app.exit(0);
+        }
+        _ => {
+            eprintln!("menu item {} not handled", event.id.as_ref());
+        }
+    });
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -200,6 +217,7 @@ pub fn run() {
         }))
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
+            // In debug builds open the webview devtools by default
             #[cfg(debug_assertions)]
             {
                 let window = app.get_webview_window("main").unwrap();
@@ -211,19 +229,9 @@ pub fn run() {
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
             let tray = TrayIconBuilder::new()
-                //.icon("src-tauri/icons/icon.png")
                 .icon(app.default_window_icon().unwrap().clone())
-                .menu(&menu)
-                .menu_on_left_click(false)
                 .build(app)?;
-            tray.on_menu_event(|app, event| match event.id.as_ref() {
-                "quit" => {
-                    app.exit(0);
-                }
-                _ => {
-                    eprintln!("menu item {} not handled", event.id.as_ref());
-                }
-            });
+
             tray.on_tray_icon_event(|tray_handle, event| {
                 let app = tray_handle.app_handle();
                 tauri_plugin_positioner::on_tray_event(app, &event);
@@ -234,7 +242,9 @@ pub fn run() {
                     let _ = win.set_focus();
                 }
             });
+            setup_menu(app, &tray)?;
 
+            // Hide the window when it loses focus
             let win = app.get_webview_window("main").unwrap();
             win.clone().on_window_event(move |event| {
                 if let tauri::WindowEvent::Focused(focussed) = event {
