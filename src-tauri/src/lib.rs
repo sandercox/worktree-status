@@ -249,7 +249,7 @@ pub fn run() {
             win.clone().on_window_event(move |event| {
                 if let tauri::WindowEvent::Focused(focussed) = event {
                     if !focussed {
-                        println!("Window lost focus");
+                        dbg!("Window lost focus - but not hiding because debug mode!");
                         #[cfg(not(debug_assertions))]
                         {
                             let _ = win.hide();
