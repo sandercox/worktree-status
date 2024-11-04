@@ -206,8 +206,9 @@ pub fn run() {
                 window.open_devtools();
             }
 
-            let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-            let menu = Menu::with_items(app, &[&quit_i])?;
+            // Hide the application from the macOS dock
+            #[cfg(target_os = "macos")]
+            app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
             let tray = TrayIconBuilder::new()
                 //.icon("src-tauri/icons/icon.png")
