@@ -45,17 +45,17 @@ async fn launch_app(app_path: &str, worktree_path: &str) -> Result<(), String> {
     // launch external process with arugments
     let mut app_to_launch = app_path.clone();
 
-        // On macOS we might be given bundles to launch instead of actual
-        // executables. We need to find the executable inside the bundle.
-        #[cfg(target_os = "macos")]
-        if app_path.ends_with(".app") {
-            // read info plist from Contents to find CFBundleExecutable to run
+    // On macOS we might be given bundles to launch instead of actual
+    // executables. We need to find the executable inside the bundle.
+    #[cfg(target_os = "macos")]
+    if app_path.ends_with(".app") {
+        // read info plist from Contents to find CFBundleExecutable to run
         let info_plist = application_plist(&app_path)?;
 
-            // lookup CFBundleExecutable
-            let app_name = info_plist.cf_bundle_executable.as_str();
-            app_to_launch = app_path + "/Contents/MacOS/" + app_name;
-        }
+        // lookup CFBundleExecutable
+        let app_name = info_plist.cf_bundle_executable.as_str();
+        app_to_launch = app_path + "/Contents/MacOS/" + app_name;
+    }
     let _ = std::thread::spawn(move || {
         let _ = std::process::Command::new(app_to_launch)
             .arg(worktree_path)
@@ -99,9 +99,23 @@ struct BranchState {
 #[tauri::command]
 fn get_branch_state(path: &str) -> Result<BranchState, String> {
     // use libgit crate to get the branch state
-    let repo = Repository::open(path).map_err(|e| e.message().to_string())?;
-    let head = repo.head().map_err(|e| e.message().to_string())?;
+    let repo = Repository::open(path)
+        .map_err(|e| "Could not open repository: ".to_string() + e.message())?;
+    let head = repo.head();
 
+    if head.is_err() {
+        return Ok(BranchState {
+            branch: "".to_string(),
+            ahead: 0,
+            behind: 0,
+            staged: 0,
+            modified: 0,
+            deleted: 0,
+            untracked: 0,
+            conflict: 0,
+        });
+    }
+    let head = head.unwrap();
     let branch_name = head.shorthand();
     if branch_name.is_none() {
         return Err("Could not get branchname!".to_string());
@@ -115,21 +129,6 @@ fn get_branch_state(path: &str) -> Result<BranchState, String> {
         }
         branch_name += " is tag!";
     }
-    if head.is_branch() {
-        branch_name = "BRANCH: ".to_string() + &branch_name;
-    }
-
-    if repo.head_detached().unwrap() {
-        branch_name += "detached";
-    } else {
-        branch_name += "attached";
-    }
-
-    let reftype = head.kind().unwrap();
-    match reftype {
-        git2::ReferenceType::Direct => branch_name += "direct",
-        git2::ReferenceType::Symbolic => branch_name += "symbolic",
-    }
 
     let branch_name = branch_name;
     let mut ahead = 0;
@@ -141,13 +140,14 @@ fn get_branch_state(path: &str) -> Result<BranchState, String> {
         let branch = repo
             .find_branch(&branch_name, git2::BranchType::Local)
             .map_err(|e| e.message().to_string() + "branch!" + &branch_name)?;
-        let upstream = branch.upstream().map_err(|e| e.message().to_string())?;
-        (ahead, behind) = repo
-            .graph_ahead_behind(
-                branch.get().target().unwrap(),
-                upstream.get().target().unwrap(),
-            )
-            .map_err(|e| e.message().to_string() + "ahead-behind!")?;
+        if let Ok(upstream) = branch.upstream() {
+            (ahead, behind) = repo
+                .graph_ahead_behind(
+                    branch.get().target().unwrap(),
+                    upstream.get().target().unwrap(),
+                )
+                .map_err(|e| e.message().to_string() + "ahead-behind!")?;
+        }
     }
     let (ahead, behind) = (ahead, behind);
 
@@ -348,6 +348,7 @@ pub fn run() {
 
             // Hide the application from the macOS dock
             #[cfg(target_os = "macos")]
+            #[cfg(not(debug_assertions))]
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
             let tray = TrayIconBuilder::new()
