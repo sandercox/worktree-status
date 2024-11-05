@@ -7,6 +7,22 @@ import { WorktreeStatusContext } from "../contexts/WorktreeStatusContext";
 import { DirectoryResult, BranchState } from "../types";
 import { Actions } from "./Actions";
 
+interface StateProps {
+  name: string;
+  icon: string;
+  count: number;
+}
+
+const State: React.FC<StateProps> = ({ name, icon, count }) => {
+  if (count === 0) return <></>;
+  return (
+    <span title={count + " " + name}>
+      {count}
+      {icon}
+    </span>
+  );
+};
+
 export const Worktree: React.FC<DirectoryResult> = ({ name, path }) => {
   const [branchState, setBranchState] = React.useState<BranchState | null>(
     null
@@ -46,18 +62,18 @@ export const Worktree: React.FC<DirectoryResult> = ({ name, path }) => {
                 {branchState.branch}
               </div>
               <div>
-                {branchState.behind > 0 && (
-                  <span title={branchState.behind + " behind"}>
-                    {branchState.behind}↓{" "}
-                  </span>
-                )}
-                {branchState.ahead > 0 && <>{branchState.ahead}↑ </>}
-                {branchState.staged > 0 && <>{branchState.staged}✔ </>}
-                {branchState.added > 0 && <>{branchState.added}+ </>}
-                {branchState.modified > 0 && <>{branchState.modified}± </>}
-                {branchState.deleted > 0 && <>{branchState.deleted}⦸ </>}
-                {branchState.untracked > 0 && <>{branchState.untracked}? </>}
-                {branchState.conflict > 0 && <>{branchState.conflict}⨂ </>}
+                <State name="behind" icon="↓" count={branchState.behind} />
+                <State name="ahead" icon="↑" count={branchState.ahead} />
+                <State name="staged" icon="✔" count={branchState.staged} />
+                {/* <State name="added" icon="+" count={branchState.added} /> */}
+                <State name="modified" icon="±" count={branchState.modified} />
+                <State name="deleted" icon="⦸" count={branchState.deleted} />
+                <State
+                  name="untracked"
+                  icon="?"
+                  count={branchState.untracked}
+                />
+                <State name="conflict" icon="⨂" count={branchState.conflict} />
               </div>
             </>
           )}
@@ -70,42 +86,3 @@ export const Worktree: React.FC<DirectoryResult> = ({ name, path }) => {
     </Container>
   );
 };
-
-// import React from "react";
-// import Shortcut from "./Shortcut";
-
-// export interface Action {
-//     name: string;
-//     icon: string;
-// }
-
-// interface WorkreeProps {
-//     name: string;
-//     refName: string;
-//     status: string;
-//     actions: Action[];
-
-//     onAction: (action: Action) => void;
-// }
-
-// const WorktreeDisplay: React.FC<WorkreeProps> = ({ name, refName, status, actions, onAction }) => {
-//     return (
-//         <div>
-//             <h2>{name}</h2>
-//             <h3>{refName}</h3>
-//             <h4>{status}</h4>
-//             <div>
-//                 {actions.map((action, index) => (
-//                     <Shortcut key={index} name={action.name} icon={action.icon} onClick={() => onAction(action)} />
-//                 ))}
-//             </div>
-//         </div>
-//     )
-// }
-
-// export const Worktree: React.FC<{ path: string }> = ({ path }) => {
-//     return (
-//         <div><h2>{path}</h2></div>
-//     )
-// };
-// export default Worktree;
