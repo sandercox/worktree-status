@@ -1,9 +1,15 @@
+#[cfg(target_os = "windows")]
+mod windows;
+
+#[cfg(target_os = "macos")]
+mod macos;
+
 use git2::Repository;
-use std::{borrow::Cow, io::BufReader, io::BufWriter};
+use std::borrow::Cow;
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
-    Emitter, Manager,
+    Manager,
 };
 use tauri_plugin_positioner::{Position, WindowExt};
 
@@ -11,26 +17,6 @@ use tauri_plugin_positioner::{Position, WindowExt};
 struct DirectoryResult {
     name: String,
     path: String,
-}
-
-#[derive(serde::Deserialize)]
-struct AppPlist {
-    #[serde(rename = "CFBundleExecutable")]
-    cf_bundle_executable: String,
-
-    #[serde(rename = "CFBundleIconFile")]
-    cf_bundle_icon_file: Option<String>,
-}
-
-fn application_plist(app_bundle: &str) -> Result<AppPlist, String> {
-    // Check if app_bundle path is a directory
-    if !std::path::Path::new(app_bundle).is_dir() {
-        return Err("app_bundle is not a directory!".to_string());
-    }
-
-    let info_plist = app_bundle.to_string() + "/Contents/Info.plist";
-    let plist_content: AppPlist = plist::from_file(info_plist).map_err(|e| e.to_string())?;
-    Ok(plist_content)
 }
 
 #[tauri::command]
@@ -43,19 +29,23 @@ async fn launch_app(app_path: &str, worktree_path: &str) -> Result<(), String> {
     }
 
     // launch external process with arugments
-    let mut app_to_launch = app_path.clone();
+    let app_to_launch = if cfg!(target_os = "macos") {
+        // On macOS we might be given bundles to launch instead of actual
+        // executables. We need to find the executable inside the bundle.
+        #[cfg(target_os = "macos")]
+        if app_path.ends_with(".app") {
+            // read info plist from Contents to find CFBundleExecutable to run
+            let info_plist = macos::application_plist(&app_path)?;
 
-    // On macOS we might be given bundles to launch instead of actual
-    // executables. We need to find the executable inside the bundle.
-    #[cfg(target_os = "macos")]
-    if app_path.ends_with(".app") {
-        // read info plist from Contents to find CFBundleExecutable to run
-        let info_plist = application_plist(&app_path)?;
+            // lookup CFBundleExecutable
+            let app_name = info_plist.cf_bundle_executable.as_str();
+            return Ok(app_path + "/Contents/MacOS/" + app_name);
+        }
+        Ok::<String, String>(app_path)
+    } else {
+        Ok(app_path)
+    }?;
 
-        // lookup CFBundleExecutable
-        let app_name = info_plist.cf_bundle_executable.as_str();
-        app_to_launch = app_path + "/Contents/MacOS/" + app_name;
-    }
     let _ = std::thread::spawn(move || {
         let _ = std::process::Command::new(app_to_launch)
             .arg(worktree_path)
@@ -97,7 +87,7 @@ struct BranchState {
 }
 
 #[tauri::command]
-fn get_branch_state(path: &str) -> Result<BranchState, String> {
+async fn get_branch_state(path: &str) -> Result<BranchState, String> {
     // use libgit crate to get the branch state
     let repo = Repository::open(path)
         .map_err(|e| "Could not open repository: ".to_string() + e.message())?;
@@ -197,12 +187,6 @@ fn get_branch_state(path: &str) -> Result<BranchState, String> {
     })
 }
 
-#[derive(Clone, serde::Serialize)]
-struct Payload {
-    args: Vec<String>,
-    cwd: String,
-}
-
 fn setup_menu(app: &tauri::App, tray: &tauri::tray::TrayIcon) -> tauri::Result<()> {
     let quit_i = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&quit_i])?;
@@ -220,46 +204,6 @@ fn setup_menu(app: &tauri::App, tray: &tauri::tray::TrayIcon) -> tauri::Result<(
     Ok(())
 }
 
-fn convert_icns_to_png(icon_path: String) -> Result<Vec<u8>, String> {
-    let icon_path = std::path::Path::new(&icon_path);
-    if !icon_path.exists() {
-        return Err("Icon path does not exist".to_string());
-    }
-    let icon = BufReader::new(std::fs::File::open(icon_path).map_err(|e| e.to_string())?);
-    let icon_family = icns::IconFamily::read(icon).map_err(|e| e.to_string())?;
-
-    let mut icon = None;
-    let icon_types = [
-        icns::IconType::RGBA32_32x32_2x,
-        icns::IconType::RGBA32_64x64,
-        icns::IconType::RGBA32_128x128,
-        icns::IconType::RGBA32_128x128_2x,
-        icns::IconType::RGBA32_256x256,
-        icns::IconType::RGBA32_256x256_2x,
-        icns::IconType::RGBA32_512x512,
-        icns::IconType::RGBA32_512x512_2x,
-        icns::IconType::RGBA32_32x32,
-        icns::IconType::RGBA32_16x16_2x,
-        icns::IconType::RGBA32_16x16,
-    ];
-
-    for icon_type in icon_types.iter() {
-        if let Ok(found_icon) = icon_family.get_icon_with_type(*icon_type) {
-            icon = Some(found_icon);
-            break;
-        }
-    }
-
-    let mut icon_png_data = Vec::new();
-    let png_icon = BufWriter::new(&mut icon_png_data);
-    if icon.is_none() {
-        return Err("No proper icon size found in icns file".to_string());
-    }
-    let icon = icon.unwrap();
-    icon.write_png(png_icon).map_err(|e| e.to_string())?;
-    Ok(icon_png_data)
-}
-
 fn serve_image(req: tauri::http::Request<Vec<u8>>) -> Result<(&'static str, Vec<u8>), String> {
     // get icon from request
     let request_path = req.uri().path();
@@ -267,16 +211,26 @@ fn serve_image(req: tauri::http::Request<Vec<u8>>) -> Result<(&'static str, Vec<
 
     // url decode the path
     let request_path = urlencoding::decode(request_path).unwrap();
-    if !std::path::Path::new(request_path.as_ref()).exists() {
-        return Err(format!("Path does not exist '{}'", request_path));
+    let mut icon_path = request_path.to_string();
+
+    #[cfg(target_os = "windows")]
+    if icon_path.ends_with(".exe") && !std::path::Path::new(&icon_path).exists() {
+        icon_path = windows::resolve_using_path(icon_path).ok_or_else(|| {
+            format!(
+                "Could not find executable '{}' in system path",
+                request_path
+            )
+        })?;
     }
 
-    let mut icon_path = request_path.to_string();
+    if !std::path::Path::new(&icon_path).exists() {
+        return Err(format!("Path does not exist '{}'", request_path));
+    }
 
     #[cfg(target_os = "macos")]
     if request_path.ends_with(".app") {
         // open info plist and get CFBundleIconFile
-        let info_plist = application_plist(&request_path)?;
+        let info_plist = macos::application_plist(&request_path)?;
         if info_plist.cf_bundle_icon_file.is_none() {
             return Err("No CFBundleIconFile found in Info.plist".to_string());
         } else {
@@ -291,16 +245,13 @@ fn serve_image(req: tauri::http::Request<Vec<u8>>) -> Result<(&'static str, Vec<
 
     #[cfg(target_os = "macos")]
     if icon_path.ends_with(".icns") {
-        let image_data = convert_icns_to_png(icon_path)?;
+        let image_data = macos::convert_icns_to_png(icon_path)?;
         return Ok(("image/png", image_data));
     }
 
     #[cfg(target_os = "windows")]
-    if icon_path.ends_with(".ico") {
-        let image_data = convert_ico_to_png(icon_path)?;
-        return Ok(("image/png", image_data));
-    } else if icon_path.ends_with(".exe") {
-        let image_data = convert_exe_to_png(icon_path)?;
+    if icon_path.ends_with(".ico") || icon_path.ends_with(".exe") {
+        let image_data = windows::convert_icon_to_png(icon_path)?;
         return Ok(("image/png", image_data));
     }
 
@@ -328,10 +279,7 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_single_instance::init(|app, argv, cwd| {
-            app.emit("single-instance", Payload { args: argv, cwd })
-                .unwrap();
-        }))
+        .plugin(tauri_plugin_single_instance::init(|_app, _argv, _cwd| {}))
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
             // In debug builds open the webview devtools by default
