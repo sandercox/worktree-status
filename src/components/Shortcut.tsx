@@ -14,8 +14,9 @@ export const Shortcut: React.FC<ShortcutProps> = ({ name, icon, onClick }) => {
       onClick={onClick}
       aria-label={`Open in ${name}`}
       className="m-0 p-0"
+      title={`Open in ${name}`}
     >
-      <img src={icon} style={{ maxHeight: "1em", maxWidth: "1em" }} />
+      <img src={icon} />
     </Button>
   );
 };

@@ -76,9 +76,15 @@ export const Configuration: React.FC<ConfigurationProps> = ({
         onBrowseIcon={onBrowseActionIcon}
         onSubmit={(action) => {
           if (modalAction) {
-            onUpdateAction(modalAction, action);
+            onUpdateAction(modalAction, {
+              ...action,
+              icon: action.icon === "" ? null : action.icon,
+            });
           } else {
-            onAddAction(action);
+            onAddAction({
+              ...action,
+              icon: action.icon === "" ? null : action.icon,
+            });
           }
           setShowActionModal(false);
         }}

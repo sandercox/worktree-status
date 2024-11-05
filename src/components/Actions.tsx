@@ -15,7 +15,13 @@ export const Actions: React.FC<ActionsProps> = ({ path }) => {
       {actionContext.actions.map((action, index) => (
         <Shortcut
           key={index}
-          {...action}
+          name={action.name}
+          icon={
+            (actionContext.urlForIcon &&
+              actionContext.urlForIcon(action.icon ?? action.path)) ??
+            action.icon ??
+            action.path
+          }
           onClick={() => {
             actionContext.onAction(action, path);
           }}

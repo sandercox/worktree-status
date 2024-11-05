@@ -31,7 +31,7 @@ export const Actions: React.FC<ActionsProps> = ({
                 <img
                   className="me-1"
                   style={{ maxWidth: "1em", maxHeight: "1em" }}
-                  src={urlForIcon(action.icon)}
+                  src={urlForIcon(action.icon ?? action.path)}
                 />
               )}
               {action.name}

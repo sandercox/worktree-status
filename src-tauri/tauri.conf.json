@@ -22,7 +22,7 @@
       }
     ],
     "security": {
-      "csp": null
+      "csp": "default-src 'self' ipc: http://ipc.localhost; img-src 'self' worktree-status: http://worktree-status.localhost"
     }
   },
   "bundle": {

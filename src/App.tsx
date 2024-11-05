@@ -4,6 +4,7 @@ import { Header } from "./components/Header";
 // Tauri imports
 import { open } from "@tauri-apps/plugin-dialog";
 import { Store, load } from "@tauri-apps/plugin-store";
+import { convertFileSrc } from "@tauri-apps/api/core";
 
 // Components
 import { Gear } from "react-bootstrap-icons";
@@ -104,7 +105,8 @@ function App() {
 
   function urlForIcon(icon: string) {
     if (icon.startsWith("http://") || icon.startsWith("https://")) return icon;
-    return icon;
+
+    return convertFileSrc(icon, "worktree-status");
   }
 
   return (
