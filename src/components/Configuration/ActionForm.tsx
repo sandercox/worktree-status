@@ -7,8 +7,8 @@ import Button from "react-bootstrap/Button";
 interface ActionFormProps {
   action: Action | null;
   onUpdate: (action: Action) => void;
-  onBrowsePath: (oldPath: string | undefined) => Promise<string | null>;
-  onBrowseIcon: (oldIcon: string | undefined) => Promise<string | null>;
+  onBrowsePath: (oldPath: string | undefined | null) => Promise<string | null>;
+  onBrowseIcon: (oldIcon: string | undefined | null) => Promise<string | null>;
 }
 
 export const ActionForm: React.FC<ActionFormProps> = ({

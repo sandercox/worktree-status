@@ -48,7 +48,7 @@ function App() {
           c.paths === undefined ||
           c.actions === undefined
         )
-          c = null;
+          c = undefined;
         setConfig(
           c || {
             paths: [],
@@ -66,7 +66,8 @@ function App() {
             ],
           }
         );
-        if (c === null || c.paths.length === 0) setShowConfig(true);
+        if (c === null || c === undefined || c.paths.length === 0)
+          setShowConfig(true);
       });
       setStore(newStore);
     }
@@ -86,19 +87,19 @@ function App() {
     setConfig({ ...config, paths: config.paths.filter((v) => v !== path) });
   }
 
-  async function browsePath(oldPath: string | undefined) {
+  async function browsePath(oldPath: string | undefined | null) {
     return await open({
       multiple: false,
       directory: false,
-      defaultPath: oldPath,
+      defaultPath: oldPath ?? undefined,
       title: "Select the action object to execute",
     });
   }
-  async function browseIcon(oldIcon: string | undefined) {
+  async function browseIcon(oldIcon: string | undefined | null) {
     return await open({
       multiple: false,
       directory: false,
-      defaultPath: oldIcon,
+      defaultPath: oldIcon ?? undefined,
       title: "Select icon for the action",
     });
   }

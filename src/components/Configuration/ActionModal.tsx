@@ -9,8 +9,8 @@ interface ActionModalProps {
   action: Action | null | undefined;
   onCancel: () => void;
   onSubmit: (action: Action) => void;
-  onBrowsePath: (oldPath: string | undefined) => Promise<string | null>;
-  onBrowseIcon: (oldIcon: string | undefined) => Promise<string | null>;
+  onBrowsePath: (oldPath: string | undefined | null) => Promise<string | null>;
+  onBrowseIcon: (oldIcon: string | undefined | null) => Promise<string | null>;
 }
 
 export const ActionModal: React.FC<ActionModalProps> = ({

@@ -12,8 +12,12 @@ export interface ConfigurationProps {
   onAddAction: (action: Action) => void;
   onRemoveAction: (action: Action) => void;
   onUpdateAction: (old: Action, updated: Action) => void;
-  onBrowseActionPath: (oldPath: string | undefined) => Promise<string | null>;
-  onBrowseActionIcon: (oldIcon: string | undefined) => Promise<string | null>;
+  onBrowseActionPath: (
+    oldPath: string | undefined | null
+  ) => Promise<string | null>;
+  onBrowseActionIcon: (
+    oldIcon: string | undefined | null
+  ) => Promise<string | null>;
   urlForIcon?: (icon: string) => string;
 
   onStore?: () => void;
