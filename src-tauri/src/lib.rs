@@ -245,7 +245,6 @@ fn convert_icns_to_png(icon_path: String) -> Result<Vec<u8>, String> {
 
     for icon_type in icon_types.iter() {
         if let Ok(found_icon) = icon_family.get_icon_with_type(*icon_type) {
-            dbg!(icon_type);
             icon = Some(found_icon);
             break;
         }
@@ -262,15 +261,12 @@ fn convert_icns_to_png(icon_path: String) -> Result<Vec<u8>, String> {
 }
 
 fn serve_image(req: tauri::http::Request<Vec<u8>>) -> Result<(&'static str, Vec<u8>), String> {
-    dbg!(&req);
-
     // get icon from request
     let request_path = req.uri().path();
     let request_path = &request_path[1..];
 
     // url decode the path
     let request_path = urlencoding::decode(request_path).unwrap();
-    dbg!(&request_path);
     if !std::path::Path::new(request_path.as_ref()).exists() {
         return Err(format!("Path does not exist '{}'", request_path));
     }
@@ -284,7 +280,6 @@ fn serve_image(req: tauri::http::Request<Vec<u8>>) -> Result<(&'static str, Vec<
         if info_plist.cf_bundle_icon_file.is_none() {
             return Err("No CFBundleIconFile found in Info.plist".to_string());
         } else {
-            dbg!(&info_plist.cf_bundle_icon_file);
             let icon_file = info_plist.cf_bundle_icon_file.unwrap();
 
             icon_path = request_path.to_string()
