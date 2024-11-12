@@ -22,12 +22,16 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' ipc: http://ipc.localhost; img-src 'self' worktree-status: http://worktree-status.localhost"
+      "csp": {
+        "default-src": "'self' ipc: http://ipc.localhost",
+        "img-src": "'self' data: worktree-status: http://worktree-status.localhost",
+        "font-src": "'self' https://use.typekit.net",
+        "style-src": "'unsafe-inline' 'self' https://use.typekit.net https://p.typekit.net"
+      }
     }
   },
   "bundle": {
-    "active": true,
-    "targets": "all",
+    "active": false,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

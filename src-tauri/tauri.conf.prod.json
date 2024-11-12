@@ -1,0 +1,23 @@
+{
+    "$schema": "https://schema.tauri.app/config/2.1.0",
+    "bundle": {
+        "active": true,
+        "createUpdaterArtifacts": true,
+        "targets": [
+            "app",
+            "dmg",
+            "msi"
+        ],
+        "windows": {
+            "signCommand": "trusted-signing.cmd %1"
+        }
+    },
+    "plugins": {
+        "updater": {
+            "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDE2OEU0QzU2NTEyRTM2QkEKUldTNk5pNVJWa3lPRm05Z0FqeDUzNkhEVEZuRnFqa3g4eXlaUzY0ZWdpMXVyVEVWNkI0c0hhN2IK",
+            "endpoints": [
+                "https://github.com/sandercox/worktree-status/releases/latest/download/latest.json"
+            ]
+        }
+    }
+}

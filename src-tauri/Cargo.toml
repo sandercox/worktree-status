@@ -34,3 +34,4 @@ icns = "0.3.1"
 
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-positioner = { version = "2.0.0", features = ["tray-icon"] }
+tauri-plugin-updater = "2"
