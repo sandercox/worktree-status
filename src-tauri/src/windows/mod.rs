@@ -1,5 +1,5 @@
-pub mod icon;
-pub mod path;
+mod icon;
+mod path;
 
 pub use icon::*;
 pub use path::*;

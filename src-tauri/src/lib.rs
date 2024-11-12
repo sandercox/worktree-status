@@ -19,6 +19,14 @@ struct DirectoryResult {
     path: String,
 }
 
+fn get_app_binary_path(path: &str) -> Result<String, String> {
+    #[cfg(target_os = "macos")]
+    return macos::get_app_binary_path(path);
+
+    #[cfg(not(target_os = "macos"))]
+    Ok(path.to_owned())
+}
+
 #[tauri::command]
 async fn launch_app(app_path: &str, worktree_path: &str) -> Result<(), String> {
     let app_path = app_path.to_string();
@@ -29,22 +37,7 @@ async fn launch_app(app_path: &str, worktree_path: &str) -> Result<(), String> {
     }
 
     // launch external process with arugments
-    let app_to_launch = if cfg!(target_os = "macos") {
-        // On macOS we might be given bundles to launch instead of actual
-        // executables. We need to find the executable inside the bundle.
-        #[cfg(target_os = "macos")]
-        if app_path.ends_with(".app") {
-            // read info plist from Contents to find CFBundleExecutable to run
-            let info_plist = macos::application_plist(&app_path)?;
-
-            // lookup CFBundleExecutable
-            let app_name = info_plist.cf_bundle_executable.as_str();
-            return Ok(app_path + "/Contents/MacOS/" + app_name);
-        }
-        Ok::<String, String>(app_path)
-    } else {
-        Ok(app_path)
-    }?;
+    let app_to_launch = get_app_binary_path(&app_path)?;
 
     let _ = std::thread::spawn(move || {
         let _ = std::process::Command::new(app_to_launch)
@@ -276,6 +269,7 @@ fn serve_image(req: tauri::http::Request<Vec<u8>>) -> Result<(&'static str, Vec<
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_dialog::init())
