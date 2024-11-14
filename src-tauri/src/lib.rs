@@ -5,11 +5,11 @@ mod windows;
 mod macos;
 
 use git2::Repository;
-use std::borrow::Cow;
+use std::{borrow::Cow, sync::Mutex};
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
-    Manager,
+    Manager, State,
 };
 use tauri_plugin_positioner::{Position, WindowExt};
 
@@ -25,6 +25,18 @@ fn get_app_binary_path(path: &str) -> Result<String, String> {
 
     #[cfg(not(target_os = "macos"))]
     Ok(path.to_owned())
+}
+
+struct AppConfig {
+    hide_on_focus_lost: bool,
+}
+
+#[tauri::command]
+fn hide_on_focus_lost(state: State<'_, Mutex<AppConfig>>, new_state: bool) -> bool {
+    let mut state = state.lock().unwrap();
+    dbg!("Setting hide_on_focus_lost to {}", new_state);
+    state.hide_on_focus_lost = new_state;
+    state.hide_on_focus_lost
 }
 
 #[tauri::command]
@@ -268,14 +280,20 @@ fn serve_image(req: tauri::http::Request<Vec<u8>>) -> Result<(&'static str, Vec<
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    tauri::Builder::default()
-        .plugin(tauri_plugin_updater::Builder::new().build())
+    let tauri_builder = tauri::Builder::default();
+    #[cfg(not(debug_assertions))]
+    let tauri_builder = tauri_builder.plugin(tauri_plugin_updater::Builder::new().build());
+    tauri_builder
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_single_instance::init(|_app, _argv, _cwd| {}))
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
+            app.manage(Mutex::new(AppConfig {
+                hide_on_focus_lost: true,
+            }));
+
             // In debug builds open the webview devtools by default
             #[cfg(debug_assertions)]
             {
@@ -308,10 +326,11 @@ pub fn run() {
             let win = app.get_webview_window("main").unwrap();
             win.clone().on_window_event(move |event| {
                 if let tauri::WindowEvent::Focused(focussed) = event {
-                    if !focussed {
-                        dbg!("Window lost focus - but not hiding because debug mode!");
+                    let state = win.app_handle().state::<Mutex<AppConfig>>();
+                    if !focussed && state.lock().unwrap().hide_on_focus_lost {
                         #[cfg(not(debug_assertions))]
                         {
+                            dbg!("Window lost focus - but not hiding because debug mode!");
                             let _ = win.hide();
                         }
                     }
@@ -342,7 +361,8 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             scan_directory,
             get_branch_state,
-            launch_app
+            launch_app,
+            hide_on_focus_lost
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

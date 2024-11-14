@@ -24,6 +24,7 @@ import { WorktreeStatusContext } from "./contexts/WorktreeStatusContext";
 import { scan_directory } from "./actions/scan_directory";
 import { get_branch_state } from "./actions/get_branch_state";
 import { launch_app } from "./actions/launch_app";
+import { hide_on_focus_lost } from "./actions/hide_on_focus_lost";
 
 // Stylesheets
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -75,11 +76,13 @@ function App() {
   }, []);
 
   async function addPath() {
+    await hide_on_focus_lost(false);
     const selected = await open({
       multiple: false,
       directory: true,
       title: "Select folder that contains subfolders with git worktrees",
     });
+    await hide_on_focus_lost(true);
     if (selected !== null)
       setConfig({ ...config, paths: [...config.paths, selected] });
   }
@@ -88,20 +91,26 @@ function App() {
   }
 
   async function browsePath(oldPath: string | undefined | null) {
-    return await open({
+    await hide_on_focus_lost(false);
+    const selected = await open({
       multiple: false,
       directory: false,
       defaultPath: oldPath ?? undefined,
       title: "Select the action object to execute",
     });
+    await hide_on_focus_lost(true);
+    return selected;
   }
   async function browseIcon(oldIcon: string | undefined | null) {
-    return await open({
+    await hide_on_focus_lost(false);
+    const selected = await open({
       multiple: false,
       directory: false,
       defaultPath: oldIcon ?? undefined,
       title: "Select icon for the action",
     });
+    await hide_on_focus_lost(true);
+    return selected;
   }
 
   function urlForIcon(icon: string) {
