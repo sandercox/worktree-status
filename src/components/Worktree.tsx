@@ -45,7 +45,7 @@ export const Worktree: React.FC<DirectoryResult> = ({ name, path }) => {
     return () => {
       setState = false;
     };
-  }, [path]);
+  }, [path, worktreeContext.seed]);
 
   return (
     <Container fluid className="p-0 worktree">

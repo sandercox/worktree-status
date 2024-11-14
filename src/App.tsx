@@ -31,6 +31,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.scss";
 
 function App() {
+  const [seed, setSeed] = React.useState(0);
   const [showConfig, setShowConfig] = React.useState(false);
   const [config, setConfig] = React.useState<Config>({
     paths: [],
@@ -119,6 +120,10 @@ function App() {
     return convertFileSrc(icon, "worktree-status");
   }
 
+  window.onfocus = async () => {
+    setSeed((seed + 1) % 1000);
+    console.log("Window gained focus again!");
+  };
   return (
     <>
       <Header>
@@ -169,6 +174,7 @@ function App() {
       {config !== null && config.paths.length !== 0 && (
         <WorktreeStatusContext.Provider
           value={{
+            seed: seed,
             scan_directory: scan_directory,
             get_branch_state: get_branch_state,
           }}
