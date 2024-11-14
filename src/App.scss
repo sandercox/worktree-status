@@ -45,6 +45,20 @@ h3 {
   }
 }
 
+.updater {
+
+  button {
+    margin-left: 0.5em;
+  }
+
+  .progress {
+    margin-top: 0.5em;
+  }
+  button:has(+ .progress) {
+    margin-top: -0.5em;
+  }
+}
+
 .worktree {
   font-size: 0.7em;
   border-bottom: 1px solid #ccc;

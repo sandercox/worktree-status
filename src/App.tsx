@@ -1,5 +1,6 @@
 import React from "react";
 import { Header } from "./components/Header";
+import { Updater } from "./components/Updater";
 
 // Tauri imports
 import { open } from "@tauri-apps/plugin-dialog";
@@ -63,7 +64,7 @@ function App() {
               {
                 name: "Explorer",
                 path: "explorer.exe",
-                icon: "explorer.png",
+                icon: null,
               },
             ],
           }
@@ -171,6 +172,7 @@ function App() {
           }
         />
       )}
+      <Updater />
       {config !== null && config.paths.length !== 0 && (
         <WorktreeStatusContext.Provider
           value={{
