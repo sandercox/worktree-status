@@ -1,6 +1,6 @@
 [package]
 name = "worktree-status"
-version = "0.1.0"
+version = "0.1.1"
 description = "WorkTree Status - Git Worktree Status"
 authors = ["Sander Cox <sander@paralleldimension.nl>"]
 edition = "2021"
@@ -27,7 +27,7 @@ plist = "1.7.0"
 urlencoding = "2.1.3"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-systemicons = { git = "https://github.com/sandercox/systemicons", branch = "fix-bmp-nd4" }
+systemicons = "0.9.13"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 icns = "0.3.1"
