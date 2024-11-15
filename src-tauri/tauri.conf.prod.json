@@ -1,5 +1,6 @@
 {
     "$schema": "https://schema.tauri.app/config/2.1.0",
+    "identifier": "com.paralleldimension.worktree-status.app",
     "bundle": {
         "active": true,
         "createUpdaterArtifacts": true,
