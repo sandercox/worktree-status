@@ -7,6 +7,7 @@ import { ActionModal } from "./ActionModal";
 
 export interface ConfigurationProps {
   config: Config;
+  systemActions: Action[];
   onAddPath: () => void;
   onRemovePath: (path: string) => void;
   onAddAction: (action: Action) => void;
@@ -25,6 +26,7 @@ export interface ConfigurationProps {
 
 export const Configuration: React.FC<ConfigurationProps> = ({
   config,
+  systemActions,
   onAddPath,
   onRemovePath,
   onStore,
@@ -40,8 +42,14 @@ export const Configuration: React.FC<ConfigurationProps> = ({
   const [modalAction, setModalAction] = React.useState<
     Action | null | undefined
   >(undefined);
-  const addAction = () => {
-    console.log("Add action!");
+  const addAction = (action: Action | null) => {
+    if (action !== null) {
+      onAddAction({
+        ...action,
+        icon: action.icon === "" ? null : action.icon,
+      });
+      return;
+    }
     setModalAction(null);
     setShowActionModal(true);
   };
@@ -61,7 +69,8 @@ export const Configuration: React.FC<ConfigurationProps> = ({
       />
       <Actions
         actions={config.actions}
-        onAddAction={() => addAction()}
+        systemActions={systemActions}
+        onAddAction={(action) => addAction(action)}
         onEditAction={(action) => editAction(action)}
         onRemoveAction={(action) => onRemoveAction(action)}
         urlForIcon={urlForIcon}

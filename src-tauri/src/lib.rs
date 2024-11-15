@@ -39,6 +39,70 @@ fn hide_on_focus_lost(state: State<'_, Mutex<AppConfig>>, new_state: bool) -> bo
     state.hide_on_focus_lost
 }
 
+#[derive(Clone, serde::Serialize, serde::Deserialize)]
+struct Action {
+    name: String,
+    path: String,
+    icon: Option<String>,
+    arguments: Option<String>,
+}
+
+#[tauri::command]
+fn get_default_actions() -> Vec<Action> {
+    #[cfg(target_os = "macos")]
+    {
+        let mut actions = Vec::new();
+
+        if std::path::Path::new("/Applications/Visual Studio Code.app").exists() {
+            actions.push(Action {
+                name: "Visual Studio Code".to_string(),
+                path: "/Applications/Visual Studio Code.app".to_string(),
+                icon: None,
+                arguments: None,
+            });
+        }
+
+        actions.push(Action {
+            name: "Finder".to_string(),
+            path: "open".to_string(),
+            icon: Some("/System/Library/CoreServices/Finder.app".to_string()),
+            arguments: None,
+        });
+
+        actions.push(Action {
+            name: "Terminal".to_string(),
+            path: "/System/Applications/Utilities/Terminal.app".to_string(),
+            icon: None,
+            arguments: None,
+        });
+
+        actions
+    }
+
+    #[cfg(target_os = "windows")]
+    {
+        let mut actions = Vec::new();
+
+        if std::path::Path::new("C:/Program Files/Microsoft VS Code/Code.exe").exists() {
+            actions.push(Action {
+                name: "Visual Studio Code".to_string(),
+                path: "C:/Program Files/Microsoft VS Code/Code.exe".to_string(),
+                icon: None,
+                arguments: None,
+            });
+        }
+
+        actions.push(Action {
+            name: "Explorer".to_string(),
+            path: "explorer.exe".to_string(),
+            icon: None,
+            arguments: None,
+        });
+
+        actions
+    }
+}
+
 #[tauri::command]
 async fn launch_app(app_path: &str, worktree_path: &str) -> Result<(), String> {
     let app_path = app_path.to_string();
@@ -363,7 +427,8 @@ pub fn run() {
             scan_directory,
             get_branch_state,
             launch_app,
-            hide_on_focus_lost
+            hide_on_focus_lost,
+            get_default_actions
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

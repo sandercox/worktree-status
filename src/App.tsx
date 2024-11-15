@@ -15,7 +15,7 @@ import { DirectoryStatus } from "./components/DirectoryStatus";
 import { Configuration } from "./components/Configuration";
 
 // Types
-import { Config } from "./types";
+import { Action, Config } from "./types";
 
 // Contexts
 import { ActionContext } from "./contexts/ActionContext";
@@ -26,6 +26,7 @@ import { scan_directory } from "./actions/scan_directory";
 import { get_branch_state } from "./actions/get_branch_state";
 import { launch_app } from "./actions/launch_app";
 import { hide_on_focus_lost } from "./actions/hide_on_focus_lost";
+import { get_default_actions } from "./actions/get_default_actions";
 
 // Stylesheets
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -38,12 +39,15 @@ function App() {
     paths: [],
     actions: [],
   });
+  const [systemActions, setSystemActions] = React.useState<Action[]>([]);
 
   const [store, setStore] = React.useState<Store | null>(null);
 
   React.useEffect(() => {
     async function initStore() {
       const newStore = await load("worktree-status", undefined);
+      const defaultActions = await get_default_actions();
+      setSystemActions(defaultActions);
       newStore.get<Config>("config").then((c) => {
         if (
           c === null ||
@@ -55,18 +59,7 @@ function App() {
         setConfig(
           c || {
             paths: [],
-            actions: [
-              {
-                name: "VS Code",
-                path: "c:\\Program Files\\code.exe",
-                icon: "vscode.png",
-              },
-              {
-                name: "Explorer",
-                path: "explorer.exe",
-                icon: null,
-              },
-            ],
+            actions: systemActions,
           }
         );
         if (c === null || c === undefined || c.paths.length === 0)
@@ -138,6 +131,7 @@ function App() {
       {showConfig && (
         <Configuration
           config={config}
+          systemActions={systemActions}
           onAddPath={addPath}
           onRemovePath={(path) => removePath(path)}
           onAddAction={(action) => {
