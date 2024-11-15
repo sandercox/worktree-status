@@ -380,9 +380,22 @@ pub fn run() {
                 tauri_plugin_positioner::on_tray_event(app, &event);
                 let win = app.get_webview_window("main").unwrap();
                 let _ = win.as_ref().window().move_window(Position::TrayCenter);
-                if let tauri::tray::TrayIconEvent::Click { .. } = event {
-                    let _ = win.show();
-                    let _ = win.set_focus();
+                if let tauri::tray::TrayIconEvent::Click {
+                    id: _,
+                    position: _,
+                    rect: _,
+                    button: _,
+                    button_state,
+                } = event
+                {
+                    if let tauri::tray::MouseButtonState::Down = button_state {
+                        if win.is_visible().unwrap_or(true) {
+                            let _ = win.hide();
+                        } else {
+                            let _ = win.show();
+                            let _ = win.set_focus();
+                        }
+                    }
                 }
             });
             setup_menu(app, &tray)?;
@@ -393,11 +406,9 @@ pub fn run() {
                 if let tauri::WindowEvent::Focused(focussed) = event {
                     let state = win.app_handle().state::<Mutex<AppConfig>>();
                     if !focussed && state.lock().unwrap().hide_on_focus_lost {
+                        dbg!("Window lost focus - but not hiding because debug mode!");
                         #[cfg(not(debug_assertions))]
-                        {
-                            dbg!("Window lost focus - but not hiding because debug mode!");
-                            let _ = win.hide();
-                        }
+                        let _ = win.hide();
                     }
                 }
             });
