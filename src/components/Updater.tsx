@@ -16,8 +16,12 @@ export const Updater: React.FC = () => {
 
   React.useEffect(() => {
     const checkForUpdate = async () => {
-      const update = await check();
-      setUpdateAvailable(update);
+      try {
+        const update = await check();
+        setUpdateAvailable(update);
+      }
+      catch (e) {
+      }
     };
     checkForUpdate();
   }, []);
