@@ -48,7 +48,7 @@ export const Worktree: React.FC<DirectoryResult> = ({ name, path }) => {
   }, [path, worktreeContext.seed]);
 
   return (
-    <Container fluid className="p-0 worktree">
+    <Container fluid className="p-1 worktree">
       <Row>
         <Col>
           <h3 title={path} aria-label={path}>

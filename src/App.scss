@@ -46,7 +46,6 @@ h3 {
 }
 
 .updater {
-
   button {
     margin-left: 0.5em;
   }
@@ -61,7 +60,6 @@ h3 {
 
 .worktree {
   font-size: 0.7em;
-  border-bottom: 1px solid #ccc;
   h3 {
     font-weight: 700;
     margin: 0;
@@ -107,4 +105,10 @@ h3 {
     max-width: 1.3em;
     max-height: 1.3em;
   }
+}
+.worktree:not(:last-child) {
+  border-bottom: 1px solid #ccc;
+}
+.accordion-body {
+  padding-bottom: 0px;
 }
