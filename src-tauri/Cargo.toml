@@ -1,6 +1,6 @@
 [package]
 name = "worktree-status"
-version = "0.1.2"
+version = "0.2.0"
 description = "WorkTree Status - Git Worktree Status"
 authors = ["Sander Cox <sander@paralleldimension.nl>"]
 edition = "2021"
