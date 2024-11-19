@@ -12,6 +12,7 @@
     "dialog:allow-open",
     "updater:default",
     "process:allow-restart",
-    "store:default"
+    "store:default",
+    "autostart:default"
   ]
 }

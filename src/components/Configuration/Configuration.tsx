@@ -2,13 +2,15 @@ import React from "react";
 import { Paths } from "./Paths";
 import { Actions } from "./Actions";
 import Button from "react-bootstrap/Button";
-import { Config, Action } from "../../types";
+import { Config, Action, Setting } from "../../types";
 import { ActionModal } from "./ActionModal";
+import { Settings } from "./Settings";
 
 export interface ConfigurationProps {
   config: Config;
   systemActions: Action[];
   version: string | null;
+  settings: Setting[];
   onAddPath: () => void;
   onRemovePath: (path: string) => void;
   onAddAction: (action: Action) => void;
@@ -21,6 +23,7 @@ export interface ConfigurationProps {
     oldIcon: string | undefined | null
   ) => Promise<string | null>;
   urlForIcon?: (icon: string) => string;
+  onUpdateSettings: (settings: Setting[]) => void;
 
   onStore?: () => void;
 }
@@ -29,6 +32,7 @@ export const Configuration: React.FC<ConfigurationProps> = ({
   config,
   systemActions,
   version,
+  settings,
   onAddPath,
   onRemovePath,
   onStore,
@@ -39,6 +43,7 @@ export const Configuration: React.FC<ConfigurationProps> = ({
   onBrowseActionPath,
   onBrowseActionIcon,
   urlForIcon,
+  onUpdateSettings,
 }) => {
   const [showActionModal, setShowActionModal] = React.useState(false);
   const [modalAction, setModalAction] = React.useState<
@@ -77,6 +82,9 @@ export const Configuration: React.FC<ConfigurationProps> = ({
         onRemoveAction={(action) => onRemoveAction(action)}
         urlForIcon={urlForIcon}
       />
+      <Settings
+        settings={settings}
+        onUpdateSettings={(s) => onUpdateSettings(s)} />
       <div className="clearfix">
         {version && <p className="version float-end">v{version}</p>}
         {onStore && (

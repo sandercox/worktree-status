@@ -352,6 +352,10 @@ pub fn run() {
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_positioner::init())
         .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
         .plugin(tauri_plugin_single_instance::init(|_app, _argv, _cwd| {}))
         .plugin(tauri_plugin_store::Builder::default().build())
         .setup(|app| {
@@ -388,7 +392,7 @@ pub fn run() {
                     button_state,
                 } = event
                 {
-                    if let tauri::tray::MouseButtonState::Down = button_state {
+                    if tauri::tray::MouseButtonState::Down == button_state {
                         if win.is_visible().unwrap_or(true) {
                             let _ = win.hide();
                         } else {
