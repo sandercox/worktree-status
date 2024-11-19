@@ -37,3 +37,6 @@ icns = "0.3.1"
 tauri-plugin-positioner = { version = "2.0.0", features = ["tray-icon"] }
 tauri-plugin-updater = "2"
 tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v2" }
+
+[patch.crates-io]
+tauri = { git = "https://github.com/tauri-apps/tauri", branch = "dev" }
