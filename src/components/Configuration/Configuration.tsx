@@ -13,9 +13,11 @@ export interface ConfigurationProps {
   settings: Setting[];
   onAddPath: () => void;
   onRemovePath: (path: string) => void;
+  onReorderPaths: (paths: string[]) => void;
   onAddAction: (action: Action) => void;
   onRemoveAction: (action: Action) => void;
   onUpdateAction: (old: Action, updated: Action) => void;
+  onReorderActions: (actions: Action[]) => void;
   onBrowseActionPath: (
     oldPath: string | undefined | null
   ) => Promise<string | null>;
@@ -35,11 +37,13 @@ export const Configuration: React.FC<ConfigurationProps> = ({
   settings,
   onAddPath,
   onRemovePath,
+  onReorderPaths,
   onStore,
 
   onAddAction,
   onRemoveAction,
   onUpdateAction,
+  onReorderActions,
   onBrowseActionPath,
   onBrowseActionIcon,
   urlForIcon,
@@ -73,6 +77,7 @@ export const Configuration: React.FC<ConfigurationProps> = ({
         paths={config.paths}
         onAddPath={onAddPath}
         onRemovePath={(path) => onRemovePath(path)}
+        onReorderPaths={(paths) => onReorderPaths(paths)}
       />
       <Actions
         actions={config.actions}
@@ -80,6 +85,7 @@ export const Configuration: React.FC<ConfigurationProps> = ({
         onAddAction={(action) => addAction(action)}
         onEditAction={(action) => editAction(action)}
         onRemoveAction={(action) => onRemoveAction(action)}
+        onReorderAction={(actions) => onReorderActions(actions)}
         urlForIcon={urlForIcon}
       />
       <Settings

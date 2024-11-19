@@ -163,6 +163,9 @@ function App() {
           systemActions={systemActions}
           onAddPath={addPath}
           onRemovePath={(path) => removePath(path)}
+          onReorderPaths={(paths) => {
+            setConfig({ ...config, paths: paths });
+          }}
           onAddAction={(action) => {
             setConfig({ ...config, actions: [...config.actions, action] });
           }}
@@ -180,6 +183,10 @@ function App() {
               actions: config.actions.filter((a) => a !== action),
             });
           }}
+          onReorderActions={(actions) => {
+            setConfig({ ...config, actions: actions });
+          }}
+
           onBrowseActionPath={async (oldPath) => browsePath(oldPath)}
           onBrowseActionIcon={async (oldIcon) => browseIcon(oldIcon)}
           urlForIcon={urlForIcon}
