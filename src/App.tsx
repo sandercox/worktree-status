@@ -6,6 +6,7 @@ import { Updater } from "./components/Updater";
 import { open } from "@tauri-apps/plugin-dialog";
 import { Store, load } from "@tauri-apps/plugin-store";
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { getVersion } from "@tauri-apps/api/app";
 
 // Components
 import { Gear } from "react-bootstrap-icons";
@@ -34,6 +35,7 @@ import "./App.scss";
 
 function App() {
   const [seed, setSeed] = React.useState(0);
+  const [version, setVersion] = React.useState<string | null>(null);
   const [showConfig, setShowConfig] = React.useState(false);
   const [config, setConfig] = React.useState<Config>({
     paths: [],
@@ -44,6 +46,7 @@ function App() {
   const [store, setStore] = React.useState<Store | null>(null);
 
   React.useEffect(() => {
+    getVersion().then((v) => setVersion(v));
     async function initStore() {
       const newStore = await load("worktree-status", undefined);
       const defaultActions = await get_default_actions();
@@ -131,6 +134,7 @@ function App() {
       {showConfig && (
         <Configuration
           config={config}
+          version={version}
           systemActions={systemActions}
           onAddPath={addPath}
           onRemovePath={(path) => removePath(path)}
@@ -157,11 +161,11 @@ function App() {
           onStore={
             store
               ? () =>
-                  store &&
-                  store
-                    .set("config", config)
-                    .then(() => store.save())
-                    .then(() => setShowConfig(false))
+                store &&
+                store
+                  .set("config", config)
+                  .then(() => store.save())
+                  .then(() => setShowConfig(false))
               : undefined
           }
         />

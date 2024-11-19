@@ -8,6 +8,7 @@ import { ActionModal } from "./ActionModal";
 export interface ConfigurationProps {
   config: Config;
   systemActions: Action[];
+  version: string | null;
   onAddPath: () => void;
   onRemovePath: (path: string) => void;
   onAddAction: (action: Action) => void;
@@ -27,6 +28,7 @@ export interface ConfigurationProps {
 export const Configuration: React.FC<ConfigurationProps> = ({
   config,
   systemActions,
+  version,
   onAddPath,
   onRemovePath,
   onStore,
@@ -75,13 +77,16 @@ export const Configuration: React.FC<ConfigurationProps> = ({
         onRemoveAction={(action) => onRemoveAction(action)}
         urlForIcon={urlForIcon}
       />
-      {onStore && (
-        <div className="text-center mt-3">
-          <Button size="sm" variant="secondary" onClick={onStore}>
-            Save Configuration
-          </Button>
-        </div>
-      )}
+      <div className="clearfix">
+        {version && <p className="version float-end">v{version}</p>}
+        {onStore && (
+          <div className="text-center mt-3">
+            <Button size="sm" variant="secondary" onClick={onStore}>
+              Save Configuration
+            </Button>
+          </div>
+        )}
+      </div>
       <ActionModal
         action={showActionModal ? modalAction : undefined}
         onCancel={() => setShowActionModal(false)}
