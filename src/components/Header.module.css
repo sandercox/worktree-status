@@ -11,6 +11,7 @@
 }
 .headerNormal {
   position: relative;
+  opacity: 0;
 }
 
 .header h1 {
