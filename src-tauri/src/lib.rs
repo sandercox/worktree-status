@@ -90,6 +90,19 @@ fn get_default_actions() -> Vec<Action> {
                 icon: None,
                 arguments: None,
             });
+        } else {
+            let base_dirs = directories::BaseDirs::new().expect("Could not get base directories");
+            let path = base_dirs
+                .data_local_dir()
+                .join("Programs/Microsoft VS Code/Code.exe");
+            if path.exists() {
+                actions.push(Action {
+                    name: "Visual Studio Code".to_string(),
+                    path: path.to_str().expect("Path to string").to_string(),
+                    icon: None,
+                    arguments: None,
+                });
+            }
         }
 
         actions.push(Action {
