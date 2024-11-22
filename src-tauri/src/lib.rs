@@ -390,7 +390,7 @@ pub fn run() {
 
             let tray = TrayIconBuilder::new()
                 .icon(app.default_window_icon().unwrap().clone())
-                .title("Worktree Status")
+                //.title("Worktree Status")
                 .tooltip("Worktree Status")
                 .build(app)?;
 
