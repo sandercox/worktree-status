@@ -6,6 +6,7 @@ import Accordion from "react-bootstrap/Accordion";
 import Button from "react-bootstrap/Button";
 import ProgressBar from "react-bootstrap/ProgressBar";
 import { relaunch } from "@tauri-apps/plugin-process";
+import Markdown from "react-markdown";
 
 export const Updater: React.FC = () => {
   const [updateAvailable, setUpdateAvailable] = React.useState<Update | null>(
@@ -19,9 +20,7 @@ export const Updater: React.FC = () => {
       try {
         const update = await check();
         setUpdateAvailable(update);
-      }
-      catch (e) {
-      }
+      } catch (e) {}
     };
     checkForUpdate();
   }, []);
@@ -59,12 +58,12 @@ export const Updater: React.FC = () => {
           <Accordion.Header className="font-serif">
             Update Available!
           </Accordion.Header>
-          <Accordion.Body>
+          <Accordion.Body style={{ paddingBottom: "0.5rem" }}>
             Update to {updateAvailable.version}
             {updateAvailable.body && (
               <div>
                 <h3>Release Notes:</h3>
-                {updateAvailable.body}
+                <Markdown>{updateAvailable.body}</Markdown>
               </div>
             )}
             <div className="clearfix">
