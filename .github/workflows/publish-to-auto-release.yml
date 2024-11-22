@@ -3,7 +3,7 @@ name: "publish"
 on:
   push:
     tags:
-      - 'v[0-9]+.[0-9]+.[0-9]+'
+      - "v[0-9]+.[0-9]+.[0-9]+"
 
 # On each push to the `release` branch it will create or update a GitHub release, build your app, and upload the artifacts to the release.
 
@@ -49,6 +49,16 @@ jobs:
 
       - name: install frontend dependencies
         run: npm install # change this to npm, pnpm or bun depending on which one you use.
+
+      - name: Get Latest Release Notes
+        id: release-notes
+        shell: bash
+        run: |
+          content=$(awk '/^##/{if(++n==1){p=1;next};if(p){exit}};p' release-notes.md)
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          echo "::set-output name=RELEASE_NOTES::$content"
 
       - name: Prepare for codesigning
         uses: sandercox/trusted-signing@main
@@ -96,7 +106,7 @@ jobs:
         with:
           tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "WorktreeStatus v__VERSION__"
-          releaseBody: "See the assets to download this version and install."
+          releaseBody: ${{ steps.release-notes.outputs.RELEASE_NOTES }}
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }} --config src-tauri/tauri.conf.prod.json
