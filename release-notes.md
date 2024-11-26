@@ -1,5 +1,10 @@
 # Release Notes
 
+## v0.2.4
+
+- fix: icon outline
+- fix: DMG layout
+
 ## v0.2.3
 
 - don't set title (macOS menubar)
