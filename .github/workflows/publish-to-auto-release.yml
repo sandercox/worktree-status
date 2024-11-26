@@ -69,16 +69,16 @@ jobs:
           correlation_id: "github-codesign-test"
         if: matrix.platform == 'windows-latest'
 
-      - name: Cargo Caching
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            src-tauri/target/
-          key: ${{ runner.os }}-${{ runner.arch }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      # - name: Cargo Caching
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       ~/.cargo/bin/
+      #       ~/.cargo/registry/index/
+      #       ~/.cargo/registry/cache/
+      #       ~/.cargo/git/db/
+      #       src-tauri/target/
+      #     key: ${{ runner.os }}-${{ runner.arch }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
       - uses: tauri-apps/tauri-action@v0
         env:
@@ -103,6 +103,10 @@ jobs:
 
           # Force static openSSL
           OPENSSL_STATIC: 1
+
+          # Nice DMGs on macOS
+          # https://github.com/tauri-apps/tauri-action/issues/740
+          CI: false
         with:
           tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "WorktreeStatus v__VERSION__"
