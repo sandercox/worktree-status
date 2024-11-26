@@ -1,5 +1,10 @@
 # Release Notes
 
+## v0.2.5
+
+- fix: dark/light mode for menubar icon on macOS
+- fix: right click menu on Windows
+
 ## v0.2.4
 
 - fix: icon outline
