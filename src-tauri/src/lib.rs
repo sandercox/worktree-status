@@ -403,11 +403,13 @@ pub fn run() {
                     id: _,
                     position: _,
                     rect: _,
-                    button: _,
+                    button,
                     button_state,
                 } = event
                 {
-                    if tauri::tray::MouseButtonState::Down == button_state {
+                    if tauri::tray::MouseButtonState::Down == button_state
+                        && tauri::tray::MouseButton::Left == button
+                    {
                         if win.is_visible().unwrap_or(true) {
                             let _ = win.hide();
                         } else {
