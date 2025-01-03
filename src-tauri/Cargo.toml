@@ -37,7 +37,7 @@ icns = "0.3.1"
 [target."cfg(not(any(target_os = \"android\", target_os = \"ios\")))".dependencies]
 tauri-plugin-positioner = { version = "2.0.0", features = ["tray-icon"] }
 tauri-plugin-updater = "2"
-tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v2" }
+tauri-plugin-autostart = "2"
 
-[patch.crates-io]
-tauri = { git = "https://github.com/tauri-apps/tauri", branch = "dev" }
+#[patch.crates-io]
+#tauri = { git = "https://github.com/tauri-apps/tauri", branch = "dev" }
