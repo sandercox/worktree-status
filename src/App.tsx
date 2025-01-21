@@ -7,7 +7,11 @@ import { open } from "@tauri-apps/plugin-dialog";
 import { Store, load } from "@tauri-apps/plugin-store";
 import { convertFileSrc } from "@tauri-apps/api/core";
 import { getVersion } from "@tauri-apps/api/app";
-import { enable as autostart_enable, disable as autostart_disable, isEnabled as autostart_is_enabled } from "@tauri-apps/plugin-autostart";
+import {
+  enable as autostart_enable,
+  disable as autostart_disable,
+  isEnabled as autostart_is_enabled,
+} from "@tauri-apps/plugin-autostart";
 
 // Components
 import { Gear } from "react-bootstrap-icons";
@@ -50,14 +54,14 @@ function App() {
   React.useEffect(() => {
     getVersion().then((v) => setVersion(v));
     autostart_is_enabled().then((state) => {
-      console.log("autostart state: " + state.toString());
-
-      setSettings([{
-        key: "auto_start",
-        displayName: "Auto start",
-        type: "bool",
-        value: state.toString(),
-      }])
+      setSettings([
+        {
+          key: "auto_start",
+          displayName: "Auto start",
+          type: "bool",
+          value: state.toString(),
+        },
+      ]);
     });
     async function initStore() {
       const newStore = await load("worktree-status", undefined);
@@ -131,11 +135,8 @@ function App() {
 
   function changeSettings(settings: Setting[]) {
     if (settings.find((s) => s.key === "auto_start")?.value === "true") {
-      console.log("enable autostart");
       autostart_enable();
-    }
-    else {
-      console.log("disable autostart");
+    } else {
       autostart_disable();
     }
     setSettings(settings);
@@ -159,7 +160,9 @@ function App() {
           config={config}
           version={version}
           settings={settings}
-          onUpdateSettings={(settings: Setting[]) => { changeSettings(settings) }}
+          onUpdateSettings={(settings: Setting[]) => {
+            changeSettings(settings);
+          }}
           systemActions={systemActions}
           onAddPath={addPath}
           onRemovePath={(path) => removePath(path)}
@@ -186,18 +189,17 @@ function App() {
           onReorderActions={(actions) => {
             setConfig({ ...config, actions: actions });
           }}
-
           onBrowseActionPath={async (oldPath) => browsePath(oldPath)}
           onBrowseActionIcon={async (oldIcon) => browseIcon(oldIcon)}
           urlForIcon={urlForIcon}
           onStore={
             store
               ? () =>
-                store &&
-                store
-                  .set("config", config)
-                  .then(() => store.save())
-                  .then(() => setShowConfig(false))
+                  store &&
+                  store
+                    .set("config", config)
+                    .then(() => store.save())
+                    .then(() => setShowConfig(false))
               : undefined
           }
         />
@@ -215,7 +217,7 @@ function App() {
             value={{
               actions: config.actions,
               onAction: (action, path) => {
-                launch_app(action.path, path);
+                launch_app(action.path, action.arguments, path);
               },
               urlForIcon: urlForIcon,
             }}

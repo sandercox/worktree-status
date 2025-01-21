@@ -88,6 +88,27 @@ export const ActionForm: React.FC<ActionFormProps> = ({
             </Button>
           </div>
         </Form.Group>
+        <Form.Group className="mb-3" controlId="action.arguments">
+          <Form.Label>Arguments</Form.Label>
+          <div className="d-flex align-items-center">
+            <Form.Control
+              type="text"
+              value={(action !== null && action.arguments) || ""}
+              onChange={(e) =>
+                onUpdate({
+                  icon: "",
+                  name: "",
+                  path: "",
+                  ...action,
+                  arguments: e.target.value === "" ? null : e.target.value,
+                })
+              }
+            />
+          </div>
+          <div className="hint">
+            <pre>{"{folder}"}</pre> will be replaced by worktree-path
+          </div>
+        </Form.Group>
       </Form>
     </>
   );

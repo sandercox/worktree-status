@@ -117,3 +117,14 @@ h3 {
   margin-bottom: 0;
   padding-top: 1.6em;
 }
+
+.hint {
+  font-size: 0.8em;
+  pre {
+    background-color: #ccc;
+    display: inline-block;
+    margin-right: 0;
+    margin-bottom: 0;
+    overflow: initial;
+  }
+}

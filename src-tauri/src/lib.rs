@@ -104,12 +104,23 @@ fn get_default_actions() -> Vec<Action> {
                 });
             }
         }
-
         actions.push(Action {
             name: "Explorer".to_string(),
             path: "explorer.exe".to_string(),
             icon: None,
             arguments: None,
+        });
+        actions.push(Action {
+            name: "Command Prompt".to_string(),
+            path: "wt.exe".to_string(),
+            arguments: Some("-w 0 -d \"{folder}\" --profile \"Command Prompt\"".to_string()),
+            icon: Some("cmd.exe".to_string()),
+        });
+        actions.push(Action {
+            name: "PowerShell".to_string(),
+            path: "wt.exe".to_string(),
+            arguments: Some("-w 0 -d \"{folder}\" --profile \"Windows PowerShell\"".to_string()),
+            icon: Some("powershell.exe".to_string()),
         });
 
         actions
@@ -117,7 +128,11 @@ fn get_default_actions() -> Vec<Action> {
 }
 
 #[tauri::command]
-async fn launch_app(app_path: &str, worktree_path: &str) -> Result<(), String> {
+async fn launch_app(
+    app_path: &str,
+    arguments: Option<&str>,
+    worktree_path: &str,
+) -> Result<(), String> {
     let app_path = app_path.to_string();
     let worktree_path = worktree_path.to_string();
 
@@ -127,12 +142,20 @@ async fn launch_app(app_path: &str, worktree_path: &str) -> Result<(), String> {
 
     // launch external process with arugments
     let app_to_launch = get_app_binary_path(&app_path)?;
-
+    let arguments = arguments.map(|s| s.to_string());
     let _ = std::thread::spawn(move || {
-        let _ = std::process::Command::new(app_to_launch)
-            .arg(worktree_path)
-            .spawn()
-            .map_err(|e| e.to_string());
+        let mut command = std::process::Command::new(app_to_launch);
+        if let Some(arguments) = arguments {
+            let arguments = arguments.replace("{folder}", &worktree_path);
+            // split arguments by space but allow quoted arguments too
+            let arguments = shell_words::split(&arguments).unwrap_or_else(|_| vec![]);
+            arguments.iter().for_each(|arg| {
+                command.arg(arg);
+            });
+        } else {
+            command.arg(worktree_path);
+        }
+        command.spawn().map_err(|e| e.to_string())
     });
 
     Ok(())
