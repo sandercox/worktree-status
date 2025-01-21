@@ -1,5 +1,9 @@
 # Release Notes
 
+## v0.3.3
+
+- fix: wt.exe not found in path
+
 ## v0.3.2
 
 - feat: Command Prompt / PowerShell default commands

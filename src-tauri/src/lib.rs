@@ -110,18 +110,27 @@ fn get_default_actions() -> Vec<Action> {
             icon: None,
             arguments: None,
         });
-        actions.push(Action {
-            name: "Command Prompt".to_string(),
-            path: "wt.exe".to_string(),
-            arguments: Some("-w 0 -d \"{folder}\" --profile \"Command Prompt\"".to_string()),
-            icon: Some("cmd.exe".to_string()),
-        });
-        actions.push(Action {
-            name: "PowerShell".to_string(),
-            path: "wt.exe".to_string(),
-            arguments: Some("-w 0 -d \"{folder}\" --profile \"Windows PowerShell\"".to_string()),
-            icon: Some("powershell.exe".to_string()),
-        });
+
+        let base_dirs = directories::BaseDirs::new().expect("Could not get base directories");
+        let path = base_dirs
+            .data_local_dir()
+            .join("Microsoft/WindowsApps/wt.exe");
+        if path.exists() {
+            actions.push(Action {
+                name: "Command Prompt".to_string(),
+                path: path.to_str().expect("Path to string").to_string(),
+                arguments: Some("-w 0 -d \"{folder}\" --profile \"Command Prompt\"".to_string()),
+                icon: Some("cmd.exe".to_string()),
+            });
+            actions.push(Action {
+                name: "PowerShell".to_string(),
+                path: path.to_str().expect("Path to string").to_string(),
+                arguments: Some(
+                    "-w 0 -d \"{folder}\" --profile \"Windows PowerShell\"".to_string(),
+                ),
+                icon: Some("powershell.exe".to_string()),
+            });
+        }
 
         actions
     }
