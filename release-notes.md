@@ -1,5 +1,11 @@
 # Release Notes
 
+## v0.3.0
+
+- feat: Command Prompt / PowerShell default commands
+- feat: Action custom argument string
+- chore: npm / cargo updates
+
 ## v0.2.5
 
 - fix: dark/light mode for menubar icon on macOS
