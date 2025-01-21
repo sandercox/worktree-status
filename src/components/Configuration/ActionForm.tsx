@@ -26,7 +26,13 @@ export const ActionForm: React.FC<ActionFormProps> = ({
             type="text"
             value={(action !== null && action.name) || ""}
             onChange={(e) =>
-              onUpdate({ path: "", icon: "", ...action, name: e.target.value })
+              onUpdate({
+                path: "",
+                icon: "",
+                arguments: null,
+                ...action,
+                name: e.target.value,
+              })
             }
           />
         </Form.Group>
@@ -40,6 +46,7 @@ export const ActionForm: React.FC<ActionFormProps> = ({
                 onUpdate({
                   icon: "",
                   name: "",
+                  arguments: null,
                   ...action,
                   path: e.target.value,
                 })
@@ -51,7 +58,13 @@ export const ActionForm: React.FC<ActionFormProps> = ({
                 onBrowsePath(action?.path).then(
                   (path) =>
                     path !== null &&
-                    onUpdate({ icon: "", name: "", ...action, path: path })
+                    onUpdate({
+                      icon: "",
+                      name: "",
+                      arguments: null,
+                      ...action,
+                      path: path,
+                    })
                 )
               }
             >
@@ -69,6 +82,7 @@ export const ActionForm: React.FC<ActionFormProps> = ({
                 onUpdate({
                   path: "",
                   name: "",
+                  arguments: null,
                   ...action,
                   icon: e.target.value,
                 })
@@ -80,7 +94,13 @@ export const ActionForm: React.FC<ActionFormProps> = ({
                 onBrowseIcon(action?.icon).then(
                   (icon) =>
                     icon !== null &&
-                    onUpdate({ path: "", name: "", ...action, icon: icon })
+                    onUpdate({
+                      path: "",
+                      name: "",
+                      arguments: null,
+                      ...action,
+                      icon: icon,
+                    })
                 )
               }
             >
