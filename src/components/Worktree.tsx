@@ -76,7 +76,7 @@ export const Worktree: React.FC<DirectoryResult> = ({ name, path }) => {
                 <State name="conflict" icon="⨂" count={branchState.conflict} />
               </div>
             </>
-          )}
+          ) || "Loading..."}
           {error && <>{error}</>}
         </Col>
         <Col className="me-auto text-end">

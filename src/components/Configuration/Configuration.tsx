@@ -2,7 +2,7 @@ import React from "react";
 import { Paths } from "./Paths";
 import { Actions } from "./Actions";
 import Button from "react-bootstrap/Button";
-import { Config, Action, Setting } from "../../types";
+import { Config, Action, Setting, WorktreePath } from "../../types";
 import { ActionModal } from "./ActionModal";
 import { Settings } from "./Settings";
 
@@ -13,7 +13,7 @@ export interface ConfigurationProps {
   settings: Setting[];
   onAddPath: () => void;
   onRemovePath: (path: string) => void;
-  onReorderPaths: (paths: string[]) => void;
+  onReorderPaths: (paths: WorktreePath[]) => void;
   onAddAction: (action: Action) => void;
   onRemoveAction: (action: Action) => void;
   onUpdateAction: (old: Action, updated: Action) => void;
@@ -78,6 +78,13 @@ export const Configuration: React.FC<ConfigurationProps> = ({
         onAddPath={onAddPath}
         onRemovePath={(path) => onRemovePath(path)}
         onReorderPaths={(paths) => onReorderPaths(paths)}
+        onUpdatePath={(path) => {
+          // update our paths list and call reorder paths
+          const updatedPaths = config.paths.map((p) =>
+            p.key === path.key ? path : p
+          );
+          onReorderPaths(updatedPaths);
+        }}
       />
       <Actions
         actions={config.actions}

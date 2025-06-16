@@ -75,12 +75,21 @@ function App() {
           c.actions === undefined
         )
           c = undefined;
+        if (c !== undefined && c.paths !== undefined) {
+          c.paths = c.paths.map((p) => {
+            if (typeof p === "string")
+              // Convert string paths to WorktreePath objects
+              return { key: crypto.randomUUID(), path: p, displayName: null, filter: null, defaultCollapse: false };
+            return p;
+          });
+        }
         setConfig(
           c || {
             paths: [],
             actions: systemActions,
           }
         );
+
         if (c === null || c === undefined || c.paths.length === 0)
           setShowConfig(true);
       });
@@ -98,10 +107,10 @@ function App() {
     });
     await hide_on_focus_lost(true);
     if (selected !== null)
-      setConfig({ ...config, paths: [...config.paths, selected] });
+      setConfig({ ...config, paths: [...config.paths, { key: crypto.randomUUID(), path: selected, displayName: null, filter: null, defaultCollapse: false }] });
   }
-  function removePath(path: string) {
-    setConfig({ ...config, paths: config.paths.filter((v) => v !== path) });
+  function removePath(key: string) {
+    setConfig({ ...config, paths: config.paths.filter((v) => v.key !== key) });
   }
 
   async function browsePath(oldPath: string | undefined | null) {
@@ -224,8 +233,10 @@ function App() {
           >
             <div className="font-sans">
               <Accordion
-                defaultActiveKey={config.paths.map((_path, index) =>
-                  index.toString()
+                defaultActiveKey={config.paths.map((_path, index) => {
+                  if (_path.defaultCollapse) return "";
+                  return index.toString();
+                }
                 )}
                 alwaysOpen
               >
@@ -233,10 +244,10 @@ function App() {
                   config.paths.map((path, index) => (
                     <Accordion.Item key={index} eventKey={index.toString()}>
                       <Accordion.Header className="font-serif">
-                        {path}
+                        {path.displayName || path.path}
                       </Accordion.Header>
                       <Accordion.Body>
-                        <DirectoryStatus key={index} basepath={path} />
+                        <DirectoryStatus key={index} worktreePath={path} />
                       </Accordion.Body>
                     </Accordion.Item>
                   ))}

@@ -171,12 +171,29 @@ async fn launch_app(
 }
 
 #[tauri::command]
-async fn scan_directory(path: &str) -> Result<Vec<DirectoryResult>, String> {
+async fn scan_directory(
+    path: &str,
+    filter: Option<String>,
+) -> Result<Vec<DirectoryResult>, String> {
     let mut paths = vec![];
+
+    // Turn filter into a regex
+    let re = if let Some(pat) = &filter {
+        Some(regex::Regex::new(pat).map_err(|e| format!("Invalid regex: {}", e))?)
+    } else {
+        None
+    };
+
     if let Ok(entries) = std::fs::read_dir(path) {
         for entry in entries.flatten() {
             let path = entry.path();
+
             if path.is_dir() && path.join(".git").exists() {
+                if let Some(r) = &re {
+                    if !r.is_match(&entry.file_name().to_string_lossy()) {
+                        continue;
+                    }
+                }
                 paths.push(DirectoryResult {
                     name: entry.file_name().to_string_lossy().to_string(),
                     path: path.to_string_lossy().to_string(),

@@ -1,15 +1,101 @@
 import React from "react";
 import Button from "react-bootstrap/Button";
-import { FolderPlus, FolderMinus } from "react-bootstrap-icons";
-
+import { FolderPlus, FolderMinus, Gear, Save, XCircleFill } from "react-bootstrap-icons";
+import { WorktreePath, Setting } from "../../types";
 import { reorder } from "./Reorder";
 import { DragDropContext, Droppable, Draggable, DropResult } from "@hello-pangea/dnd";
+import { Settings } from "./Settings";
 
 interface PathsProps {
-  paths: string[];
-  onRemovePath: (path: string) => void;
+  paths: WorktreePath[];
+  onRemovePath: (key: string) => void;
   onAddPath: () => void;
-  onReorderPaths: (paths: string[]) => void;
+  onReorderPaths: (paths: WorktreePath[]) => void;
+  onUpdatePath: (path: WorktreePath) => void;
+}
+
+const WorktreePathConfig: React.FC<{
+  path: WorktreePath, onRemovePath: (key: string) => void,
+  onUpdatePath: (path: WorktreePath) => void
+}> = ({ path, onRemovePath, onUpdatePath }) => {
+  const [showConfig, setShowConfig] = React.useState(false);
+  const [settings, setSettings] = React.useState<Setting[]>([]);
+
+  React.useEffect(
+    () => {
+      setSettings([
+        {
+          key: `path-${path.key}-displayName`,
+          displayName: "Display Name",
+          type: "string",
+          value: path.displayName || "",
+        },
+        {
+          key: `path-${path.key}-filter`,
+          displayName: "Filter",
+          type: "string",
+          value: path.filter || "",
+        },
+        {
+          key: `path-${path.key}-defaultCollapse`,
+          displayName: "Default Collapse",
+          type: "bool",
+          value: path.defaultCollapse ? "true" : "false",
+        },
+      ]);
+    }, [path]
+  );
+
+  return (
+    <>
+      <span>
+        {path.displayName && (<>{path.displayName} - <span className="font-italic text-muted" style={{ fontSize: ".825em" }}>{path.path}</span></>) || path.path}
+      </span>
+      <div className="float-end">
+        <Gear onClick={() => setShowConfig(!showConfig)} style={{ cursor: "pointer" }} />
+      </div>
+      {showConfig && (
+        <>
+
+          <Settings settings={settings} onUpdateSettings={(newSettings) => { setSettings(newSettings) }} />
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={() => onRemovePath(path.key)}
+          >
+            <FolderMinus /> Remove
+          </Button>
+          <div className="float-end">
+
+            <Button
+              variant="primary"
+              size="sm"
+              className="me-2"
+              onClick={() => { setShowConfig(false); }}
+            >
+              <XCircleFill /> Close
+            </Button>
+            <Button
+              variant="success"
+              size="sm"
+              onClick={() => {
+                setShowConfig(false);
+                onUpdatePath({
+                  ...path,
+                  displayName: settings.find(s => s.key === `path-${path.key}-displayName`)?.value || null,
+                  filter: settings.find(s => s.key === `path-${path.key}-filter`)?.value || null,
+                  defaultCollapse: settings.find(s => s.key === `path-${path.key}-defaultCollapse`)?.value === "true",
+                })
+              }}
+            >
+              <Save /> Save
+            </Button>
+          </div>
+
+        </>
+      )}
+    </>
+  );
 }
 
 export const Paths: React.FC<PathsProps> = ({
@@ -17,6 +103,7 @@ export const Paths: React.FC<PathsProps> = ({
   onRemovePath,
   onAddPath,
   onReorderPaths,
+  onUpdatePath,
 }) => {
   const onDragEnd = (result: DropResult) => {
     if (!result.destination) return;
@@ -35,19 +122,11 @@ export const Paths: React.FC<PathsProps> = ({
                   {...provided.droppableProps}
                   ref={provided.innerRef}>
                   {paths.map((path, index) => (
-                    <Draggable key={path} draggableId={path} index={index}>
+                    <Draggable key={path.key} draggableId={path.key} index={index}>
                       {(provided, _snapshot) => (
                         <li className="clearfix mb-1" key={index}
                           ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps}                        >
-                          {path}
-                          <Button
-                            className="float-end"
-                            variant="danger"
-                            size="sm"
-                            onClick={() => onRemovePath(path)}
-                          >
-                            <FolderMinus /> Remove
-                          </Button>
+                          <WorktreePathConfig path={path} onRemovePath={onRemovePath} onUpdatePath={onUpdatePath} />
                         </li>
                       )}
                     </Draggable>

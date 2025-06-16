@@ -3,7 +3,10 @@ import { DirectoryResult, BranchState } from "../types";
 
 interface WorktreeStatusContextType {
   seed: number;
-  scan_directory: (path: string) => Promise<DirectoryResult[]>;
+  scan_directory: (
+    path: string,
+    filter: string | null
+  ) => Promise<DirectoryResult[]>;
   get_branch_state: (path: string) => Promise<BranchState | null>;
 }
 

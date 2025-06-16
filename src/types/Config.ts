@@ -1,6 +1,7 @@
 import { Action } from "./Action";
+import { WorktreePath } from "./WorktreePath";
 
 export interface Config {
-  paths: string[];
+  paths: WorktreePath[];
   actions: Action[];
 }
