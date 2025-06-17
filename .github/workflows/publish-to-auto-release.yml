@@ -68,7 +68,7 @@ jobs:
           endpoint: "https://weu.codesigning.azure.net"
           account_name: "paralleldimension"
           profile_name: "paralleldimension-pub-trust"
-          correlation_id: "github-codesign-test"
+          correlation_id: "github-codesign-worktreestatus"
         if: matrix.platform == 'windows-latest' || matrix.platform == 'windows-11-arm'
 
       # - name: Cargo Caching
