@@ -109,9 +109,10 @@ jobs:
           # Force static openSSL
           OPENSSL_STATIC: 1
         with:
-          tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
+          # Only set tagName and prerelease for tag builds
+          tagName: ${{ startsWith(github.ref, 'refs/tags/') && format('v__VERSION__') || '' }}
+          prerelease: ${{ !startsWith(github.ref, 'refs/tags/') }}
           releaseName: "WorktreeStatus v__VERSION__"
           releaseBody: ${{ steps.release-notes.outputs.RELEASE_NOTES }}
           releaseDraft: true
-          prerelease: false
           args: ${{ matrix.args }} --config src-tauri/tauri.conf.prod.json
