@@ -84,7 +84,7 @@ jobs:
 
       - uses: tauri-apps/tauri-action@v0
         env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
           # Windows codesigning with Azure Trusted Signing
           AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
