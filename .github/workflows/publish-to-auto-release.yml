@@ -24,7 +24,7 @@ jobs:
             target: "x86_64-apple-darwin"
             args: "--target x86_64-apple-darwin"
           - platform: windows-11-arm
-            args: ""
+            args: "--target aarch64-pc-windows-msvc"
           - platform: "windows-latest"
             args: ""
 

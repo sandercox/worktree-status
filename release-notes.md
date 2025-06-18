@@ -1,5 +1,11 @@
 # Release Notes
 
+## v0.4.0
+
+ - feat: Windows arm64 build
+ - feat: Folder search paths have names
+ - feat: Worktrees can be filtered using regex
+
 ## v0.3.3
 
 - fix: wt.exe not found in path
