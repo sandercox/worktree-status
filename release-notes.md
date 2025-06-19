@@ -1,5 +1,9 @@
 # Release Notes
 
+## v0.4.1
+
+- fix: Switch to fancy regex to support lookahead/behind
+
 ## v0.4.0
 
  - feat: Windows arm64 build

@@ -179,7 +179,7 @@ async fn scan_directory(
 
     // Turn filter into a regex
     let re = if let Some(pat) = &filter {
-        Some(regex::Regex::new(pat).map_err(|e| format!("Invalid regex: {}", e))?)
+        Some(fancy_regex::Regex::new(pat).map_err(|e| format!("Invalid regex: {}", e))?)
     } else {
         None
     };
@@ -190,7 +190,10 @@ async fn scan_directory(
 
             if path.is_dir() && path.join(".git").exists() {
                 if let Some(r) = &re {
-                    if !r.is_match(&entry.file_name().to_string_lossy()) {
+                    if !r
+                        .is_match(&entry.file_name().to_string_lossy())
+                        .unwrap_or_default()
+                    {
                         continue;
                     }
                 }
